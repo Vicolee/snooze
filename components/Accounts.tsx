@@ -13,7 +13,21 @@ export default function Account({ session }: { session: Session }) {
   const [website, setWebsite] = useState('')
   const [avatarUrl, setAvatarUrl] = useState('')
   const [image, setImage] = useState('');
+  const [uriList, setUriList] = useState<string[]>([]);
+  const [snoozeTill, setSnoozeTill] = useState<number[]>([]);
 
+  function decrement_timers() {
+    setSnoozeTill(snoozeTill => {
+      return snoozeTill.map(element => element - 1);
+    });
+  }
+  
+  const seconds = 60;
+  
+  // 👇️ call function every 3 seconds
+  setInterval(() => {
+    decrement_timers();
+  }, seconds * 1000);
 
   useEffect(() => {
     if (session) getProfile()
@@ -96,7 +110,14 @@ export default function Account({ session }: { session: Session }) {
 
     if (!result.canceled) {
       setImage(result.assets[0].uri);
+      var temp = uriList.concat([result.assets[0].uri]);
+      setUriList(temp);
+      var temp_snoozes = snoozeTill.concat([500]);
+      setSnoozeTill(temp_snoozes);
     }
+
+    console.log(image);
+    console.log("list: ", uriList);
   };
 
   async function snooze_new_screenshot() {
@@ -106,7 +127,11 @@ export default function Account({ session }: { session: Session }) {
   return (
     <View style={styles.container}>
       <View style={styles.verticallySpaced}>
-        <Button title="Add Screenshot to Snooze" onPress={() => snooze_new_screenshot()} />
+        <Button 
+          title={snoozeTill.length > 0 ? snoozeTill[0].toString() : "Add"}
+          onPress={() => snooze_new_screenshot()} 
+        />
+    
       </View>
     </View>
   )
